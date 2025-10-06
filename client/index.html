@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Socket Login Example</title>
+</head>
+<body>
+      <input type="text" id="userIdInput" placeholder="Введите ваш ID">
+      <button id="loginButton">Войти</button>
+      <button id="logoutButton" disabled>Выйти</button>
+      <div id="status"></div>
+
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script>
+      let socket = null;
+      let userId = null;
+
+      document.getElementById('loginButton').onclick = function() {
+            userId = document.getElementById('userIdInput').value.trim();
+            if (!userId) {
+                  document.getElementById('status').innerText = "Введите ID!";
+                  return;
+            }
+            document.getElementById('status').innerText = "Подключение...";
+            
+            socket = io('http://localhost:3000');
+            
+            socket.on('connect', function() {
+                  document.getElementById('status').innerText = "Успешно! Ваш ID: " + userId;
+                  document.getElementById('logoutButton').disabled = false;
+
+                  socket.emit('login', userId);
+            });
+
+            socket.on('user_update', function(user) {
+                  console.log("User update:", user);
+            });
+      };
+
+      document.getElementById('logoutButton').onclick = function() {
+            if (socket && userId) {
+                  socket.emit('logout', userId);
+                  document.getElementById('status').innerText = "Вы вышли!";
+                  document.getElementById('logoutButton').disabled = true;
+            }
+      };
+</script>
+</body>
+</html>
